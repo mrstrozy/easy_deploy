@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+'''
+Entrypoint for easy_deploy program.
+'''
+
+import logging
+import os
+import sys
+
+from argparse import ArgumentParser
+from easy_deploy.util.constants import (DEFAULT_LOG_BASE_NAME,
+                                        DEFAULT_LOG_DIR,
+                                        DEFAULT_LOG_FORMAT,
+                                        )
+from time import time
+
+def configure_logging(logBaseName: str,
+                      logDir: str,
+                      printLog: bool,
+                      verbose: bool):
+    '''
+    Configures the logging for the entire program.
+
+    Args:
+      logBaseName::str
+        Basename of logfile to log output to
+        Actual logPath will be {logDir}/{logBaseName}-{runTime}.log
+
+      logDir::str
+        Path of the log directory to log to
+
+      printLog::bool
+        If True, logging will output to stdout and a file
+        If False, logging will only output to a file
+
+      verbose::bool
+        True/False flag indicating to set the log level to DEBUG or not
+    '''
+    logLevel = logging.INFO # Default log level
+    startTime = str(time()).split('.')[0] # Discard milliseconds
+    logFullPath = '%s/%s-%s.log' % (logDir, logBaseName, startTime)
+    formatter = logging.Formatter(DEFAULT_LOG_FORMAT)
+
+    # Build file handler for file logging
+    fh = logging.FileHandler(logFullPath)
+    fh.setFormatter(formatter)
+
+    if not os.path.isdir(logDir):
+        os.makedirs(logDir)
+
+    if printLog:
+        sh = logging.StreamHandler(sys.stdout)
+        sh.setFormatter(formatter)
+        logging.getLogger().addHandler(sh)
+
+    if verbose:
+        logLevel = logging.DEBUG
+
+    logging.getLogger().addHandler(fh)
+    logging.getLogger().setLevel(logLevel)
+            
+def parse_args():
+    '''
+    Parse arguments for easy_deploy program and return args object.
+
+    Returns:
+      args object of parsed arguments
+    '''
+    parser = ArgumentParser()
+
+    parser.add_argument('-i', '--identity-file',
+                        action='store',
+                        default='',
+                        help='File used to authenticate with remote host',
+                        required=False,
+                        )
+
+    parser.add_argument('-ld', '--log-dir',
+                        action='store',
+                        default=DEFAULT_LOG_DIR,
+                        help='Directory to log messages to',
+                        required=False,
+                        )
+
+    parser.add_argument('-ln', '--log-name',
+                        action='store',
+                        default=DEFAULT_LOG_BASE_NAME,
+                        help='Base filename for the log. '\
+                             '(epoch run-time appened after this)',
+                        required=False,
+                        )
+
+    parser.add_argument('-pl', '--print-log',
+                        action='store_true',
+                        help='Print logs to stdout as well as the logfile',
+                        required=False,
+                        )
+
+    parser.add_argument('-v', '--verbose',
+                        action='store_true',
+                        help='Set logging level to DEBUG (default: INFO)',
+                        required=False,
+                        )
+    
+    return parser.parse_args()
+
+def run():
+    args = parse_args()
+    configure_logging(args.log_name,
+                      args.log_dir,
+                      args.print_log,
+                      args.verbose)
+
+if __name__ == '__main__':
+    run()
