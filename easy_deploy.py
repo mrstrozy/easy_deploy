@@ -68,6 +68,25 @@ def parse_args():
     '''
     parser = ArgumentParser()
 
+    parser.add_argument('-c', '--config',
+                        action='store',
+                        help='Filepath containing configuration steps to run',
+                        required=True,
+                        )
+
+    parser.add_argument('-d', '--dir',
+                        action='store',
+                        default='./',
+                        help='Base directory of files (default: ./)',
+                        required=True,
+                        )
+
+    parser.add_argument('-H', '--host',
+                        action='store',
+                        help='Hostname/IP of host to configure',
+                        required=True,
+                        )
+
     parser.add_argument('-i', '--identity-file',
                         action='store',
                         default='',
