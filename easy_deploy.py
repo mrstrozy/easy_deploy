@@ -12,6 +12,7 @@ from easy_deploy.util.constants import (DEFAULT_LOG_BASE_NAME,
                                         DEFAULT_LOG_DIR,
                                         DEFAULT_LOG_FORMAT,
                                         )
+from easy_deploy.run import run_deployment
 from time import time
 
 def configure_logging(logBaseName: str,
@@ -129,6 +130,10 @@ def run():
                       args.log_dir,
                       args.print_log,
                       args.verbose)
+    run_deployment(args.config,
+                   args.dir,
+                   args.host
+                   args.identity_file)
 
 if __name__ == '__main__':
     run()
