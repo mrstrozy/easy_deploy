@@ -7,7 +7,10 @@ import logging
 import sys
 
 from easy_deploy.util.connection import Connection
+from easy_deploy.util.constants import DEFAULT_FILE_DIRNAME
 from easy_deploy.util.parser import EasyDeployParser
+from easy_deploy.util.verify import Verifier
+
 
 class Deployment:
     def __init__(self,
@@ -39,22 +42,29 @@ class Deployment:
                                      identityFile=identityFile,
                                      username=username,
                                      )
-
+        self.verifier = Verifier(baseDir)
 
     def run(self,
             ):
         '''
         Run a deployment job.
         '''
+        runlist = self._build_runlist()
         # TODO
-        #      Test connection to host w/identityFile
-        #      - Can we ssh?
-        #
+        #      Possibly: verify file locations
         #      Loop through and run instructions
         #
-        #
-        runlist = self._build_runlist()
+        missing_files = self.verifier.verify_files(runlist)
 
+        if missing_files:
+            for filename in missing_files:
+                err = 'File missing: %s/%s/%s' % (self.baseDir,
+                                                  DEFAULT_FILE_DIRNAME,
+                                                  filename)
+                self.logger.error(err)
+            return
+
+   
         if not self.connection.verify_connection():
             err = 'Unable to establish connection with '\
                   '%s. Exiting..' % (self.remoteHost)
