@@ -12,7 +12,7 @@ from easy_deploy.util.constants import (DEFAULT_LOG_BASE_NAME,
                                         DEFAULT_LOG_DIR,
                                         DEFAULT_LOG_FORMAT,
                                         )
-from easy_deploy.run import run_deployment
+from easy_deploy.run import Deployment
 from time import time
 
 def configure_logging(logBaseName: str,
@@ -116,6 +116,12 @@ def parse_args():
                         required=False,
                         )
 
+    parser.add_argument('-u', '--username',
+                        action='store',
+                        help='Username to authenticate as.',
+                        required=True,
+                        )
+
     parser.add_argument('-v', '--verbose',
                         action='store_true',
                         help='Set logging level to DEBUG (default: INFO)',
@@ -132,11 +138,14 @@ def run():
                       args.verbose,
                       )
     logging.getLogger().info('Starting...')
-    run_deployment(baseDir=args.dir,
-                   identityFile=args.identity_file,
-                   instructionFile=args.config,
-                   remoteHost=args.host,
-                   )
+
+    deployment = Deployment(baseDir=args.dir,
+                            identityFile=args.identity_file,
+                            instructionFile=args.config,
+                            remoteHost=args.host,
+                            username=args.username,
+                            )
+    deployment.run()
     logging.getLogger().info('Finished.')
 if __name__ == '__main__':
     run()
