@@ -4,6 +4,9 @@ for successfully running through a deployment (run_deployment function).
 '''
 
 import logging
+import sys
+
+from easy_deploy.util.parser import EasyDeployParser
 
 def run_deployment(baseDir: str,
                    identityFile: str,
@@ -27,8 +30,16 @@ def run_deployment(baseDir: str,
         Identifier to use to connect to remote host
     '''
     logger = logging.getLogger()
-    logger.info('Starting deployment')
+    parser = EasyDeployParser()
 
+    logger.debug('Parsing config')
+    
+    runlist, errors = parser.build(instructionFile)
+
+    if errors:
+        errMsg = '\n' + '\n\n'.join(errors)
+        logging.error(errMsg)
+        sys.exit(-1)
     # TODO Confirm structure of instructionFile
     #      - This requires a yaml parser & enforcing requirements
     #      

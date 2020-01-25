@@ -2,7 +2,8 @@
 Module used to interact with easy_deploy requirements.
 '''
 
-from config_requirements_def import COMMANDS, UNIVERSAL_OPTIONS
+from easy_deploy.util.config_requirements_def import (COMMANDS,
+                                                      UNIVERSAL_OPTIONS)
 
 class OptionMenuException(Exception):
     ''' Base Exception for OptionMenu Class '''
@@ -53,7 +54,7 @@ class OptionMenu:
           CommandNotFoundException
             If no command definition is found
         '''
-        command_entry = self._verify_command(command)
+        command_entry = self.verify_command(command)
         return list(command_entry.get('mandatory'))
 
     def get_optional_options(self,
@@ -73,7 +74,7 @@ class OptionMenu:
           CommandNotFoundException
             If no command definition is found
         '''
-        command_entry = self._verify_command(command)
+        command_entry = self.verify_command(command)
         return dict(command_entry.get('optional'))
         
     def get_optional_option_names(self,
@@ -95,7 +96,7 @@ class OptionMenu:
         '''
         return self.get_optional_options(command).keys()
 
-    def _verify_command(self,
+    def verify_command(self,
                         command: str,
                         ) -> dict:
         '''

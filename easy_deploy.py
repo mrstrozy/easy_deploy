@@ -129,11 +129,14 @@ def run():
     configure_logging(args.log_name,
                       args.log_dir,
                       args.print_log,
-                      args.verbose)
-    run_deployment(args.config,
-                   args.dir,
-                   args.host
-                   args.identity_file)
-
+                      args.verbose,
+                      )
+    logging.getLogger().info('Starting...')
+    run_deployment(baseDir=args.dir,
+                   identityFile=args.identity_file,
+                   instructionFile=args.config,
+                   remoteHost=args.host,
+                   )
+    logging.getLogger().info('Finished.')
 if __name__ == '__main__':
     run()

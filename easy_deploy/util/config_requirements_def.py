@@ -13,4 +13,4 @@ COMMANDS = {
     },
 }
 
-UNIVERSAL_OPTIONS = ['restarts']
+UNIVERSAL_OPTIONS = ['command', 'restarts']

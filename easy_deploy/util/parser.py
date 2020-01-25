@@ -4,8 +4,7 @@ Module used to parse/verify an easy_deploy config.
 
 import yaml
 
-from config_requirements import commands, universal_options 
-from options_menu import OptionMenu 
+from easy_deploy.util.options_menu import OptionMenu, CommandNotFoundError
 
 class EasyDeployParserException(Exception):
     ''' General Parser Exception '''
@@ -22,24 +21,50 @@ class EasyDeployParser:
                  ):
         self.optionMenu = OptionMenu()
 
-    def parse(self,
+    def build(self,
               filename: str,
-              ) -> list:
+              ) -> (list, list):
         '''
-        Parses an easy_deploy config file
+        Builds the command queue from a easy_deploy config file
 
         Args:
           filename::str
-            Name of config file to parse
-        
-        Returns::list
-          List of any errors found. Empty if none.
-        '''
-        errors = []
-        config = self._load(filename)
+            Name of the config file to parse
 
+        Returns::list(dict)
+          List of built commands in dict form
+        '''
+        config = self._load(filename)
+        runlist = []
+        errors = self._parse(config)
+
+        if not errors:
+            runlist += self._build_with_optionals(config)
+
+        return runlist, errors
+
+    def _build_with_optionals(self,
+                              config: list,
+                              ) -> list:
+        '''
+        Appends any missing optional config options to the config
+
+        Args:
+          config::list
+            List of config blocks of easy_deploy config
+
+        Returns::list
+          List of dictionaries containing the filled in options
+        '''
+        runlist = []
         for block in config:
-            err = self._verify_block(block)
+            command = block.get('command')
+            optional_dict = self.optionMenu.get_optional_options(command)
+            for k, v in optional_dict.items():
+                if k not in block:
+                    block[k] = v
+            runlist.append(block)
+        return runlist
 
     def _load(self,
              filename: str,
@@ -61,6 +86,26 @@ class EasyDeployParser:
 
         return contents
 
+    def _parse(self,
+              config: list,
+              ) -> list:
+        '''
+        Parses an easy_deploy config list
+
+        Args:
+          config::list
+            List of config blocks of easy_deploy config
+        
+        Returns::list
+          List of any errors found. Empty if none.
+        '''
+        errors = []
+        for block in config:
+            err = self._verify_block(block)
+            if err:
+                errStr = "Block: %s\n  - %s" % (block, "\n  - ".join(err))
+                errors.append(errStr)
+        return errors
 
     def _verify_block(self,
                       block: dict,
@@ -77,15 +122,29 @@ class EasyDeployParser:
         '''
         errors = []
         command = block.get('command')
-
         if not command:
             errors.append('No command specified')
-            return errors
+        else:
+            try:
+                self.optionMenu.verify_command(command)
+            except CommandNotFoundError:
+                err = '%s is not a valid command' % command
+                errors.append(err)
+            else:
+                all_options = self.optionMenu.get_all_option_names(command)
+                mand = self.optionMenu.get_mandatory_option_names(command)
+                block_keys = block.keys()
 
-        if command not in commands:
-            err = '%s is not a valid command' % command
-            errors.append(err)
-            return errors
+                # Verify all mandatory options are set
+                for option in mand:
+                    if option not in block_keys:
+                        errMsg = 'Mandatory option "%s" not set' % option
+                        errors.append(errMsg)
 
-        for key in block.keys():
-        # TODO Look for errors with the block through optionmenu
+                # Verify all options set are known options
+                for key in block.keys():
+                    if key not in all_options:
+                        err = 'Option: "%s" not recognized' % key
+                        errors.append(err)
+        return errors
+
