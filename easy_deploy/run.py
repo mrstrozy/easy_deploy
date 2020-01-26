@@ -50,10 +50,6 @@ class Deployment:
         Run a deployment job.
         '''
         runlist = self._build_runlist()
-        # TODO
-        #      Possibly: verify file locations
-        #      Loop through and run instructions
-        #
         missing_files = self.verifier.verify_files(runlist)
 
         if missing_files:
@@ -74,6 +70,10 @@ class Deployment:
             msg = 'Successfully connected to %s' % self.remoteHost
             self.logger.info(msg)
 
+        # TODO
+        #      Loop through and run instructions
+        #
+        
     def _build_runlist(self,
                        ) -> list:
         '''
