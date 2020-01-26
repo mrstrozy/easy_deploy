@@ -5,6 +5,24 @@ Module for handling all connections with remote hosts.
 import logging
 import subprocess
 
+from functools import wraps
+
+
+def singleton(classkey: str):
+    '''
+    Singleton Decorator
+    '''
+    def _singleton(cls):
+        @wraps(cls)
+        def wrapper(*args, **kwargs):
+            if classkey not in wrapper.instances:
+                wrapper.instances[classkey] = cls(*args, **kwargs)
+            return wrapper.instances.get(classkey)
+        wrapper.instances = {}
+        return wrapper
+    return _singleton
+
+@singleton('Connection')
 class Connection:
     def __init__(self,
                  hostname: str,
