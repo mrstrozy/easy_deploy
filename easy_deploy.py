@@ -12,6 +12,7 @@ from easy_deploy.util.constants import (DEFAULT_LOG_BASE_NAME,
                                         DEFAULT_LOG_DIR,
                                         DEFAULT_LOG_FORMAT,
                                         )
+from easy_deploy.run import Deployment
 from time import time
 
 def configure_logging(logBaseName: str,
@@ -68,6 +69,25 @@ def parse_args():
     '''
     parser = ArgumentParser()
 
+    parser.add_argument('-c', '--config',
+                        action='store',
+                        help='Filepath containing configuration steps to run',
+                        required=True,
+                        )
+
+    parser.add_argument('-d', '--dir',
+                        action='store',
+                        default='./',
+                        help='Base directory of files (default: ./)',
+                        required=True,
+                        )
+
+    parser.add_argument('-H', '--host',
+                        action='store',
+                        help='Hostname/IP of host to configure',
+                        required=True,
+                        )
+
     parser.add_argument('-i', '--identity-file',
                         action='store',
                         default='',
@@ -96,6 +116,12 @@ def parse_args():
                         required=False,
                         )
 
+    parser.add_argument('-u', '--username',
+                        action='store',
+                        help='Username to authenticate as.',
+                        required=True,
+                        )
+
     parser.add_argument('-v', '--verbose',
                         action='store_true',
                         help='Set logging level to DEBUG (default: INFO)',
@@ -109,7 +135,24 @@ def run():
     configure_logging(args.log_name,
                       args.log_dir,
                       args.print_log,
-                      args.verbose)
+                      args.verbose,
+                      )
+    logging.getLogger().info('Starting...')
+
+    deployment = Deployment(baseDir=args.dir,
+                            identityFile=args.identity_file,
+                            instructionFile=args.config,
+                            remoteHost=args.host,
+                            username=args.username,
+                            )
+    success = deployment.run()
+
+    if not success:
+        msg = 'Deployment Failed'
+    else:
+        msg = 'Deployment Succeeded'
+
+    logging.getLogger().info(msg)
 
 if __name__ == '__main__':
     run()
