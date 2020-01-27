@@ -12,7 +12,7 @@ from easy_deploy.util.constants import (DEFAULT_LOG_BASE_NAME,
                                         DEFAULT_LOG_DIR,
                                         DEFAULT_LOG_FORMAT,
                                         )
-from easy_deploy.run import Deployment
+from easy_deploy.util.run import Deployment
 from time import time
 
 def configure_logging(logBaseName: str,
