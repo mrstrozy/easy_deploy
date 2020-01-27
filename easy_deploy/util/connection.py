@@ -121,8 +121,8 @@ class Connection:
             output = '' if suppressOutput else response.stdout.decode('utf-8')
             returncode = response.returncode
 
-        if response.stderr:
-            self.logger.error(response.stderr.decode('utf-8'))
+            if response.stderr:
+                self.logger.error(response.stderr.decode('utf-8'))
 
         return output, returncode
 

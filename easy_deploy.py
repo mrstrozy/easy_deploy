@@ -145,7 +145,14 @@ def run():
                             remoteHost=args.host,
                             username=args.username,
                             )
-    deployment.run()
-    logging.getLogger().info('Finished.')
+    success = deployment.run()
+
+    if not success:
+        msg = 'Deployment Failed'
+    else:
+        msg = 'Deployment Succeeded'
+
+    logging.getLogger().info(msg)
+
 if __name__ == '__main__':
     run()

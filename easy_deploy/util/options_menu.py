@@ -75,7 +75,7 @@ class OptionMenu:
             If no command definition is found
         '''
         command_entry = self.verify_command(command)
-        return dict(command_entry.get('optional'))
+        return dict(command_entry.get('optional', {}))
         
     def get_optional_option_names(self,
                                   command: str,

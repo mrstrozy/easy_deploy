@@ -72,21 +72,46 @@ class Runner:
         '''
         shutil.rmtree(self.build_dir_path)
 
-    def installDeb(self,
-                   config: dict,
-                   ) -> bool:
-        pass
+    def debianPackage(self,
+                      config: dict,
+                      action: str,
+                      ) -> bool:
+        '''
+        Installs/Removes debian package on remote host.
 
-    def removeDeb(self,
-                  config: dict,
-                  ) -> bool:
-        pass
+        Args:
+          config::dict
+            Dictionary of configuration specifying the file source
+          action::str (Optional)
+            Action to perform. Available: (install, remove)
+        
+        Returns::bool
+          True/False status of success
+        '''
+        if action == 'install':
+            flag = 'i'
+        elif action == 'remove':
+            flag = 'r'
+        else:
+            err = 'debianPackage: %s action specified, allowed actions '\
+                  'are (install, remove)' % (action)
+            self.logger.error(err)
+            return False
+
+        package = config.get('source')
+        cmd = 'ssh -i %s %s@%s "dpkg -%s %s"' % (self.identity,
+                                                 self.username,
+                                                 self.hostname,
+                                                 flag,
+                                                 package)
+        returnCode = os.system(cmd)
+        return returnCode == 0
 
     def installFile(self,
                     config: dict,
                     ) -> bool:
         '''
-        Install a file onto the instances remote host.
+        Install a file onto the remote host.
 
         Args:
           config::dict

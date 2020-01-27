@@ -51,9 +51,12 @@ class Deployment:
         self.verifier = Verifier(baseDir)
 
     def run(self,
-            ):
+            ) -> bool:
         '''
         Run a deployment job.
+
+        Returns::bool
+          True/False based on success of run.
         '''
         runlist = self._build_runlist()
         missing_files = self.verifier.verify_files(runlist)
@@ -80,19 +83,33 @@ class Deployment:
         #      Loop through and run instructions
         #
         for instruction in runlist:
+            # Run through command body first
             command = instruction.get('command')
             if command == 'installFile':
                 success = self.runner.installFile(instruction)
-                if not success:
-                    return
+            elif command == 'installDebianPackage':
+                success = self.runner.debianPackage(instruction, 'install')
+            elif command == 'removeDebianPackage':
+                success = self.runner.debianPackage(instruction, 'remove')
+            else:
+                err = 'Unrecognized command: %s' % command
+                self.logger.error(err)
+                success = False
+            
+            if not success:
+                return False
 
+
+            # Run service restart after configuration if specified
             if 'restarts' in instruction:
                 service = instruction.get('restarts')
                 success = self.runner.restart_service(service)
                 if not success:
                     err = 'Unable to restart service "%s"' % service
                     self.logger.error(err)
-                    return
+                    return False
+        # If all instructions are executed and we are here, it is a success
+        return True
 
         
     def _build_runlist(self,

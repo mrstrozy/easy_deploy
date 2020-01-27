@@ -3,6 +3,9 @@ This file specifies all requirements for each easy_deploy config command
 '''
 
 COMMANDS = {
+    'installDebianPackage': {
+        'mandatory': ['source'],
+    },
     'installFile': {
         'mandatory': ['localSource', 'remoteSource'],
         'optional': {
@@ -10,6 +13,9 @@ COMMANDS = {
             'mode': '0644',
             'owner': 'root',
         }
+    },
+    'removeDebianPackage': {
+        'mandatory': ['source'],
     },
 }
 
