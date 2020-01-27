@@ -1,0 +1,12 @@
+Metadata-Version: 1.1
+Name: easy-deploy
+Version: 0.1
+Summary: Deploy configuration to remote hosts
+Home-page: UNKNOWN
+Author: Matt Strozyk
+Author-email: mstrozyk25@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
