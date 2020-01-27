@@ -6,6 +6,7 @@ for successfully running through a deployment (run_deployment function).
 import logging
 import sys
 
+from easy_deploy.util.cmd_runner import Runner
 from easy_deploy.util.connection import Connection
 from easy_deploy.util.constants import DEFAULT_FILE_DIRNAME
 from easy_deploy.util.parser import EasyDeployParser
@@ -42,6 +43,11 @@ class Deployment:
                                      identityFile=identityFile,
                                      username=username,
                                      )
+        self.runner = Runner(baseDir=baseDir,
+                             hostname=remoteHost,
+                             identity=identityFile,
+                             username=username,
+                             )
         self.verifier = Verifier(baseDir)
 
     def run(self,
@@ -73,6 +79,21 @@ class Deployment:
         # TODO
         #      Loop through and run instructions
         #
+        for instruction in runlist:
+            command = instruction.get('command')
+            if command == 'installFile':
+                success = self.runner.installFile(instruction)
+                if not success:
+                    return
+
+            if 'restarts' in instruction:
+                service = instruction.get('restarts')
+                success = self.runner.restart_service(service)
+                if not success:
+                    err = 'Unable to restart service "%s"' % service
+                    self.logger.error(err)
+                    return
+
         
     def _build_runlist(self,
                        ) -> list:
