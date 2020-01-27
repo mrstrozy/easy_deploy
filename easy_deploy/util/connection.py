@@ -66,7 +66,7 @@ class Connection:
                                                         remoteSource)
         _, returncode = self.run_cmd(cmd,
                                     shell=True,
-                                    timeout=10)
+                                    timeout=60)
         return returncode == 0
 
     def verify_connection(self,
