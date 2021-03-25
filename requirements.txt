@@ -1,2 +1,2 @@
 easy-deploy==0.1
-PyYAML==5.3
+PyYAML==5.4
